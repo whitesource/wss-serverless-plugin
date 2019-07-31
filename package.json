@@ -4,6 +4,6 @@
   "description": "Whitesource Serverless plugin",
   "main": "index.js",  
   "author": "eRez",
-  "license": "Apache License for Github",
+  "license": "Apache 2.0",
   "dependencies": {}
 }

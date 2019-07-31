@@ -1,6 +1,6 @@
 {
   "name": "serverless-whitesource",
-  "version": "1.0.25",
+  "version": "19.7.2",
   "description": "Whitesource Serverless plugin",
   "main": "index.js",  
   "author": "eRez",

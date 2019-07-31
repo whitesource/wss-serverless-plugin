@@ -1,0 +1,9 @@
+{
+  "name": "serverless-whitesource",
+  "version": "1.0.25",
+  "description": "Whitesource Serverless plugin",
+  "main": "index.js",  
+  "author": "eRez",
+  "license": "Apache License for Github",
+  "dependencies": {}
+}

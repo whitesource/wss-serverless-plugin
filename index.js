@@ -1,5 +1,6 @@
 'use strict';
 const fs = require('fs');
+const os = require('os');
 
 class ServerlessWhitesourcePlugin {  
   
@@ -11,15 +12,21 @@ class ServerlessWhitesourcePlugin {
     };
   }
   
-  afterDeploy() {  
-	var stringToAppend = '\r\nserverless.includes=functionNames.txt';
+  afterDeploy() {	
+    var doubleDot = '..';
+    var separator = '/';
+    if (os.platform().startsWith('win')){
+		separator = '\\';
+	}
+	var functionNamesFile = __dirname + separator + 'functionNames.txt'; 	
+	var stringToAppend = '\r\nserverless.includes=' + functionNamesFile;
 	var names = '';
 	this.serverless.service.getAllFunctions().forEach((functionName) => {		
 		const functionObj = this.serverless.service.getFunction(functionName);
 		names+=functionObj.name+'\r\n';
 	});
 	const pathToConfig = this.serverless.service.custom.whitesource.pathToConfig;
-	fs.writeFile("functionNames.txt", names, function(err) {
+	fs.writeFile(functionNamesFile, names, function(err) {
 		if(err) {
 			console.log('could not write functions-name\'s file: ' + err);
 			return err;
@@ -43,7 +50,7 @@ class ServerlessWhitesourcePlugin {
 			}
 		});		
 	});
-  }  
+  }
 }
 
 module.exports = ServerlessWhitesourcePlugin;

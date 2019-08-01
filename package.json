@@ -2,8 +2,10 @@
   "name": "serverless-whitesource",
   "version": "19.7.2",
   "description": "Whitesource Serverless plugin",
-  "main": "index.js",  
+  "main": "index.js",
   "author": "eRez",
   "license": "Apache 2.0",
-  "dependencies": {}
+  "dependencies": {
+    "os": "^0.1.1"
+  }
 }

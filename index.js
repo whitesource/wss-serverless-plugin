@@ -5,7 +5,6 @@ const os = require('os');
 class ServerlessWhitesourcePlugin {  
   
   constructor(serverless, options) {
-	console.log('ServerlessWhitesourcePlugin constructor');  
     this.serverless = serverless;
 	//adding a hook to the post-deploy event
     this.hooks = {	

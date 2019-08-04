@@ -17,7 +17,7 @@ Perform a WhiteSource scan for Serverless functions.
 # Requirements
 
 - [Serverless Framework](https://github.com/serverless/serverless) 1.0 or higher
-- [WhiteSource Unified Agent] (https://whitesource.atlassian.net/wiki/spaces/WD/pages/33718339/Unified+Agent) 19.7.2 or higher
+- [WhiteSource Unified Agent](https://whitesource.atlassian.net/wiki/spaces/WD/pages/33718339/Unified+Agent) 19.7.2 or higher
 
 # Installation
 

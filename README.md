@@ -46,7 +46,7 @@ custom:
 
 ### 1. Download the UA jar
 ```
-curl -LJO https://wss-qa.s3.amazonaws.com/unified-agent/integration/wss-unified-agent
+curl -LJO https://github.com/whitesource/unified-agent-distribution/releases/latest/download/wss-unified-agent.jar
 ```
 
 ### 2. Install WhiteSource plugin

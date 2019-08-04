@@ -2,6 +2,7 @@
 const fs = require('fs');
 const os = require('os');
 
+
 class ServerlessWhitesourcePlugin {  
   
   constructor(serverless, options) {

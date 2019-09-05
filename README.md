@@ -40,8 +40,8 @@ plugins:
 custom:
   whitesource:
     pathToConfig: ${path-to-configuration-file}
-	pathToJar: ${path-to-UA-jar-file}
-	[optional] wss-{valid UA's command-line paramter}: {parameter value}
+    pathToJar: ${path-to-UA-jar-file}
+    [optional] wss-{valid UA's command-line paramter}: {parameter value}
 ```
 
 # Usage

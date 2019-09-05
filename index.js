@@ -1,7 +1,7 @@
 'use strict';
 const fs = require('fs');
 const os = require('os');
-
+const cp = require('child_process');
 
 class ServerlessWhitesourcePlugin {  
   
@@ -29,8 +29,10 @@ class ServerlessWhitesourcePlugin {
 		const functionObj = this.serverless.service.getFunction(functionName);
 		names+=functionObj.name+'\r\n';
 	});
-	// reading the path to the config file from the parameter in the serverless.yml file
+	// reading the path to the config file from the parameter in the serverless.yml file	
 	const pathToConfig = this.serverless.service.custom.whitesource.pathToConfig;
+	const whitesourceParams = this.serverless.service.custom.whitesource;
+	const runUaFunc = this.runUA;
 	// writing the function-names txt file
 	fs.writeFile(functionNamesFile, names, function(err) {
 		if(err) {
@@ -51,12 +53,48 @@ class ServerlessWhitesourcePlugin {
 						return err;
 					}
 					console.log(pathToConfig + ' file updated');
+					runUaFunc(whitesourceParams);
 				});
 			} else { // no need to append again if the file was already appended previously
 				console.log(pathToConfig + ' already contains path to function-names\' file; no need to update');
+				runUaFunc(whitesourceParams);
 			}
 		});		
 	});
+  }
+  
+  runUA(whitesourceParams) {
+	const { spawn } = require('child_process');
+	const params = [];
+	// building different parameters list depending on the OS
+	if (process.platform === 'win32'){
+		params.push('/c', 'java', '-jar', whitesourceParams.pathToJar, '-c', whitesourceParams.pathToConfig);
+	} else if (process.platform === 'linux') {
+		params.push('-jar', whitesourceParams.pathToJar, '-c', whitesourceParams.pathToConfig);
+	}
+	if (params.length > 0) {
+		// reading custom parameters from the serverless.yml 
+		for (var param in whitesourceParams) {
+			if (param.startsWith('wss-')){			
+				params.push(param.substring(3), whitesourceParams[param]);
+			}
+		}	
+		const bat = spawn(process.platform === 'linux' ? 'java' : 'cmd.exe' , params);
+
+		bat.stdout.on('data', (data) => {
+		  console.log(data.toString());
+		});
+
+		bat.stderr.on('data', (data) => {
+		  console.error(data.toString());
+		});
+
+		bat.on('exit', (code) => {
+		  console.log(`Child exited with code ${code}`);
+		});
+	} else {
+		console.log('OS ' + process.platform + ' is not supported');
+	}
   }
 }
 

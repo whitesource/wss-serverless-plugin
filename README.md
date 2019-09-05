@@ -12,12 +12,12 @@ serverless-whitesource
 
 # Description
 
-Perform a WhiteSource scan for Serverless functions. 
+Perform a WhiteSource scan for Serverless functions after deployment. 
 
 # Requirements
 
 - [Serverless Framework](https://github.com/serverless/serverless) 1.0 or higher
-- [WhiteSource Unified Agent](https://whitesource.atlassian.net/wiki/spaces/WD/pages/33718339/Unified+Agent) 19.7.2 or higher
+- [WhiteSource Unified Agent] (https://whitesource.atlassian.net/wiki/spaces/WD/pages/33718339/Unified+Agent) 19.7.2 or higher
 
 # Installation
 
@@ -40,13 +40,15 @@ plugins:
 custom:
   whitesource:
     pathToConfig: ${path-to-configuration-file}
+	pathToJar: ${path-to-UA-jar-file}
+	[optional] wss-{valid UA's command-line paramter}: {parameter value}
 ```
 
 # Usage
 
 ### 1. Download the UA jar
 ```
-curl -LJO https://github.com/whitesource/unified-agent-distribution/releases/latest/download/wss-unified-agent.jar
+curl -LJO https://wss-qa.s3.amazonaws.com/unified-agent/integration/wss-unified-agent
 ```
 
 ### 2. Install WhiteSource plugin
@@ -54,9 +56,11 @@ curl -LJO https://github.com/whitesource/unified-agent-distribution/releases/lat
 npm install serverless-whitesource
 ```
 
-### 3. Run the Unified Agent
+### 3. Update the serverless.yml with the path to the configuration-file, jar-file and relevant parameters
+
+### 4. Deploy the serverless function(s)
 ```
-java -jar wss-unified-agent.jar -c {path-to-configuration-file} -apiKey {your-api-key} -logLevel debug
+sls deploy
 ```
 
 Authors

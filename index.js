@@ -6,6 +6,8 @@ const cp = require('child_process');
 class ServerlessWhitesourcePlugin {  
   
   constructor(serverless, options) {
+	const packageDetails = require('./package.json');
+	console.log('serverless-whitesource plugin version: ', packageDetails.version);
     this.serverless = serverless;
 	//adding a hook to the post-deploy event
     this.hooks = {	
@@ -53,10 +55,12 @@ class ServerlessWhitesourcePlugin {
 						return err;
 					}
 					console.log(pathToConfig + ' file updated');
+					console.log("about to call 'runUaFunc'");
 					runUaFunc(whitesourceParams);
 				});
 			} else { // no need to append again if the file was already appended previously
 				console.log(pathToConfig + ' already contains path to function-names\' file; no need to update');
+				console.log("about to call 'runUaFunc'");
 				runUaFunc(whitesourceParams);
 			}
 		});		
@@ -64,12 +68,15 @@ class ServerlessWhitesourcePlugin {
   }
   
   runUA(whitesourceParams) {
+	console.log('runUA ' + process.platform);  
+	console.log('pathToJar = ' + whitesourceParams.pathToJar);
+	console.log('pathToConfig = ' + whitesourceParams.pathToConfig);
 	const { spawn } = require('child_process');
 	const params = [];
 	// building different parameters list depending on the OS
 	if (process.platform === 'win32'){
 		params.push('/c', 'java', '-jar', whitesourceParams.pathToJar, '-c', whitesourceParams.pathToConfig);
-	} else if (process.platform === 'linux') {
+	} else if (process.platform === 'linux' || process.platform === 'darwin') {
 		params.push('-jar', whitesourceParams.pathToJar, '-c', whitesourceParams.pathToConfig);
 	}
 	if (params.length > 0) {
@@ -79,7 +86,7 @@ class ServerlessWhitesourcePlugin {
 				params.push(param.substring(3), whitesourceParams[param]);
 			}
 		}	
-		const bat = spawn(process.platform === 'linux' ? 'java' : 'cmd.exe' , params);
+		const bat = spawn(process.platform === 'win32' ? 'cmd.exe' : 'java' , params);
 
 		bat.stdout.on('data', (data) => {
 		  console.log(data.toString());

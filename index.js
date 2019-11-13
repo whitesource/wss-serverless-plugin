@@ -1,29 +1,47 @@
 'use strict';
 const fs = require('fs');
-const os = require('os');
 const cp = require('child_process');
+const path = require('path')
 
 class ServerlessWhitesourcePlugin {  
   
   constructor(serverless, options) {
 	const packageDetails = require('./package.json');
-	console.log('serverless-whitesource plugin version: ', packageDetails.version);
+	console.log('serverless-whitesource plugin version: ', packageDetails.version);		
     this.serverless = serverless;
 	//adding a hook to the post-deploy event
     this.hooks = {	
 	  'after:deploy:deploy': this.afterDeploy.bind(this)
     };
-  }
+  }  
   
   afterDeploy() {
+	var self = this;
+	var resolveGlobal = require('resolve-global');
+	var serverlessPath = resolveGlobal('serverless');	
+	serverlessPath = serverlessPath.substr(0, serverlessPath.lastIndexOf(path.sep)-1);
+	serverlessPath = serverlessPath.substr(0, serverlessPath.lastIndexOf(path.sep));
+	fs.readFile(serverlessPath + path.sep + 'package.json', 'utf8', function(error, data) {
+      if (error) {
+        console.error(error);
+		console.log('could not detect serverless version; exiting');
+      } else {
+        var pkg = JSON.parse(data);
+        var version = pkg['version'];        
+		var versionArr = version.split('.');
+	    if (versionArr[0] > 1 || (versionArr[0] == 1 && versionArr[1] >= 49)) {
+		  self.updateConfigFile();
+	    } else {
+		  console.log('The Whitesource serverless plugin requires serverless version 1.49.0 and above, however, it has detected that the installed version is '+version+'.\r\nPlease run \'npm install -g serverless\' to update the serverless version and run the Unfied-Agent scan.');
+	   }
+      }
+    });
+  }
+  
+  updateConfigFile(){
     var doubleDot = '..';
-	// detecting if this is win os, so the separator has to be switched
-    var separator = '/';
-    if (os.platform().startsWith('win')){
-		separator = '\\';
-	}
 	// builing path to the function-names txt file
-	var functionNamesFile = __dirname + separator + 'functionNames.txt'; 	
+	var functionNamesFile = __dirname + path.sep + 'functionNames.txt'; 	
 	var stringToAppend = '\r\nserverless.includes=' + functionNamesFile;
 	var names = '';
 	// extracting name of each deployed function
@@ -54,13 +72,11 @@ class ServerlessWhitesourcePlugin {
 						console.log('could not write ' + pathToConfig + ': ' + err);				
 						return err;
 					}
-					console.log(pathToConfig + ' file updated');
-					console.log("about to call 'runUaFunc'");
+					console.log(pathToConfig + ' file updated');					
 					runUaFunc(whitesourceParams);
 				});
 			} else { // no need to append again if the file was already appended previously
-				console.log(pathToConfig + ' already contains path to function-names\' file; no need to update');
-				console.log("about to call 'runUaFunc'");
+				console.log(pathToConfig + ' already contains path to function-names\' file; no need to update');				
 				runUaFunc(whitesourceParams);
 			}
 		});		
@@ -68,10 +84,6 @@ class ServerlessWhitesourcePlugin {
   }
   
   runUA(whitesourceParams) {
-	console.log('runUA ' + process.platform);  
-	console.log('pathToJar = ' + whitesourceParams.pathToJar);
-	console.log('pathToConfig = ' + whitesourceParams.pathToConfig);
-	const { spawn } = require('child_process');
 	const params = [];
 	// building different parameters list depending on the OS
 	if (process.platform === 'win32'){
@@ -86,8 +98,7 @@ class ServerlessWhitesourcePlugin {
 				params.push(param.substring(3), whitesourceParams[param]);
 			}
 		}	
-		const bat = spawn(process.platform === 'win32' ? 'cmd.exe' : 'java' , params);
-
+		const bat = cp.spawn(process.platform === 'win32' ? 'cmd.exe' : 'java' , params);
 		bat.stdout.on('data', (data) => {
 		  console.log(data.toString());
 		});

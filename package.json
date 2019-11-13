@@ -1,13 +1,12 @@
 {
   "name": "serverless-whitesource",
-  
-  "version": "19.10.1-SNAPSHOT",
+  "version": "19.11.1",
   "description": "Whitesource Serverless plugin",
   "main": "index.js",
   "author": "eRez",
   "license": "Apache 2.0",
   "dependencies": {
     "child_process": "^1.0.2",
-    "os": "^0.1.1"
+    "resolve-global": "^1.0.0"
   }
 }

@@ -6,6 +6,7 @@
   "author": "eRez",
   "license": "Apache 2.0",
   "dependencies": {
+    "callsites": "^3.1.0",
     "child_process": "^1.0.2",
     "resolve-global": "^1.0.0"
   }

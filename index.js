@@ -3,6 +3,11 @@ const fs = require('fs');
 const cp = require('child_process');
 const path = require('path')
 
+/*
+  this plugin is ran as part of the serverlss deploy process.  it detects the serverless functions that were deployed and have the UA scan them.
+  it does so by detecting the deployed functions, writing them into a txt file, adding the path of that file to the UA's config file, and running the UA.
+  before doing so, it detects which serverless package is installed, because not all serverless versions support the command (spawn) which runs the UA
+*/
 class ServerlessWhitesourcePlugin {  
   
   constructor(serverless, options) {
@@ -16,11 +21,22 @@ class ServerlessWhitesourcePlugin {
   }  
   
   afterDeploy() {
+	// checking if the serverless package being used is 1.49.0 and above, for otherwise the plugin won't be able to run the UA  
 	var self = this;
-	var resolveGlobal = require('resolve-global');
-	var serverlessPath = resolveGlobal('serverless');	
-	serverlessPath = serverlessPath.substr(0, serverlessPath.lastIndexOf(path.sep)-1);
-	serverlessPath = serverlessPath.substr(0, serverlessPath.lastIndexOf(path.sep));
+	var callsites = require('callsites');
+	var callerPath = callsites()[1].getFileName(); // the path to the js file which called the serverless-plugin
+	var serverlessPath;
+	// checking if the used serverless plugin is local (npm i serverless) or global (npm i -g serverless)
+	var local = callerPath.includes(process.cwd());
+	if (local) {
+		serverlessPath = 'node_modules' + path.sep + 'serverless'; 
+	} else {
+		// finding the path to the global serverless package
+		var resolveGlobal = require('resolve-global');
+		var serverlessPath = resolveGlobal('serverless');	
+		serverlessPath = serverlessPath.substr(0, serverlessPath.lastIndexOf(path.sep)-1);
+		serverlessPath = serverlessPath.substr(0, serverlessPath.lastIndexOf(path.sep));
+	}
 	fs.readFile(serverlessPath + path.sep + 'package.json', 'utf8', function(error, data) {
       if (error) {
         console.error(error);
@@ -32,7 +48,7 @@ class ServerlessWhitesourcePlugin {
 	    if (versionArr[0] > 1 || (versionArr[0] == 1 && versionArr[1] >= 49)) {
 		  self.updateConfigFile();
 	    } else {
-		  console.log('The Whitesource serverless plugin requires serverless version 1.49.0 and above, however, it has detected that the installed version is '+version+'.\r\nPlease run \'npm install -g serverless\' to update the serverless version and run the Unfied-Agent scan.');
+		  console.log('The Whitesource serverless plugin requires serverless version 1.49.0 and above, however, it has detected that the installed version is ' + version + '.\r\nPlease run \'npm install' + (local ? '' : ' -g') + ' serverless\' to update the serverless version and run the Unfied-Agent scan.');
 	   }
       }
     });
